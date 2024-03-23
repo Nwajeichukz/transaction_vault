@@ -7,7 +7,7 @@ import javax.mail.MessagingException;
 import java.util.List;
 
 public interface TransactionService {
-    AppResponse<List<RecentTransactionResponse>> getTransactionReceipt();
+    AppResponse<List<RecentTransactionResponse>> getTransactionList();
 
     AppResponse<String> getAndSendToMail() throws IllegalAccessException, MessagingException;
 }
