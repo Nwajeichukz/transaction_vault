@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 
+//todo: delete unused codes
+
 @Slf4j
 @ControllerAdvice
 public class GlobalExceptionMapper extends ResponseEntityExceptionHandler {

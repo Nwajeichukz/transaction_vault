@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class EmailDto {
+    // todo: the sender is usually same person, either its hardcoded or removed
     private String sender;
     private String recipient;
 
@@ -17,8 +18,10 @@ public class EmailDto {
 
     private String subject;
 
+    // todo: still no attachment name
+    // todo: attachments are usually more than one, how would you handle that with this
     private byte[] attachment;
-
+    // todo: what are you doing with filepath here
     private String filePath;
 
 }

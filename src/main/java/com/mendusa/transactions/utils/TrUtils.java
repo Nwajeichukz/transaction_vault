@@ -26,6 +26,7 @@ public class TrUtils {
 
     public static EmailDto writeToCsv(List<?> data) {
 
+//todo: you didn't even bother to fix the last change request i made
 
         try (CSVWriter writer = new CSVWriter(new FileWriter("response.csv"))) {
 
@@ -62,7 +63,7 @@ public class TrUtils {
 
             // Get the resulting byte array
             byte[] resultByteArray = byteArrayOutputStream.toByteArray();
-
+//todo: you didn't even bother to fix the last change request i made
             // email messenger
             EmailDto emailDto = EmailDto.builder()
                     .recipient("nwajeigoddowell@gmail.com")
@@ -80,6 +81,8 @@ public class TrUtils {
         return new EmailDto();
     }
 
+    // todo: why is this return a dto
+    // todo: why is the exception not handled internally?
     public static EmailDto writeToExcelSheet(List<?> data) throws IllegalAccessException {
 
         String[] header = headerOfReceipt(data);
@@ -113,7 +116,7 @@ public class TrUtils {
             byte[] resultByteArray = byteArrayOutputStream.toByteArray();
 
             // email messenger
-
+// todo: this violates programming laws
             // email messenger
             EmailDto emailDto = EmailDto.builder()
                     .recipient("nwajeigoddowell@gmail.com")

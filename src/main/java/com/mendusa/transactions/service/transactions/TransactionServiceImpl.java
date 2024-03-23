@@ -28,25 +28,29 @@ public class TransactionServiceImpl implements TransactionService {
 
 
     @Override
-    public AppResponse<List<RecentTransactionResponse>> getTransactionReceipt() {
+    public AppResponse<List<RecentTransactionResponse>> getTransactionReceipt() {// todo: what transaction receipt?
 
         return new AppResponse<>(0, "Successful", getDescResponse());
     }
 
     @Override
     public AppResponse<String> getAndSendToMail() throws IllegalAccessException, MessagingException {
+        // todo: this is not readable
+        // todo: what is trutils??
+        // todo: what descResponse are you getting
+        // todo: why are you sending mail synchronously
         emailService.sendToEmail(TrUtils.writeToExcelSheet(getDescResponse()));
 
-//        emailService.sendToEmail(TrUtils.writeToCsv(getDescResponse()));
+//        emailService.sendToEmail(TrUtils.writeToCsv(getDescResponse())); // todo: remove unused code or write a reason for commenting it
 
         return new AppResponse<>(0, "successful");
 
     }
 
 
-    private List<RecentTransactionResponse> getDescResponse() {
-        List<Transaction> trans = repository.findAllByOrderByIdDesc();
-        Page<RecentTransactionResponse> page = repository.findAll(
+    private List<RecentTransactionResponse> getDescResponse() {// todo: i told you of this name and you left it unattended
+        List<Transaction> trans = repository.findAllByOrderByIdDesc();// todo: what is this for
+        Page<RecentTransactionResponse> page = repository.findAll( //todo: this page variable is unneccesary
                 PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id"))).map(RecentTransactionResponse::new);
 
 

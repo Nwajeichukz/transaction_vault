@@ -12,6 +12,9 @@ import java.util.Date;
 @Entity
 @Table(name = "transaction")
 public class Transaction {
+
+    //todo: what type of naming convention is this??
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, unique = true)

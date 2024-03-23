@@ -27,16 +27,16 @@ public class MailSenderConfiguration {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 
         mailSender.setHost(host);
-        mailSender.setPort(2525);
+        mailSender.setPort(2525);// todo: use a config file for this
         mailSender.setUsername(username);
         mailSender.setPassword(password);
 
 
         Properties props = mailSender.getJavaMailProperties();
-        props.put("mail.transport.protocol", "smtp");
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.debug", "true");
+        props.put("mail.transport.protocol", "smtp");// todo: use a config file for this
+        props.put("mail.smtp.auth", "true");// todo: use a config file for this
+        props.put("mail.smtp.starttls.enable", "true");// todo: use a config file for this
+        props.put("mail.debug", "true");// todo: use a config file for this
 
         return mailSender;
     }

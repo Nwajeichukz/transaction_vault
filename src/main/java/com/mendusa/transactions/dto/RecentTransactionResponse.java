@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RecentTransactionResponse {
+    // todo: why are you like this sef, i told about this naming convention and you didn't change it
     private String response_code;
 
     private String transaction_date;
