@@ -15,6 +15,7 @@ import org.thymeleaf.TemplateEngine;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.util.Objects;
 
 
 @Component
@@ -23,9 +24,6 @@ import javax.mail.internet.MimeMessage;
 public class EmailService implements EmailServiceImpl {
 
     private final JavaMailSender javaMailSender;
-
-    @Autowired
-    private TemplateEngine templateEngine;
 
     @Async
     @Override
@@ -44,9 +42,13 @@ public class EmailService implements EmailServiceImpl {
 
 
             ByteArrayResource fileAttachment = new ByteArrayResource(emailDto.getAttachment());
+
+
+
             helper.addAttachment("data.csv", fileAttachment); //todo : attachment name should not be hard-coded
 
             javaMailSender.send(message);
+
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }

@@ -36,6 +36,7 @@ public class Utils {
             csvWriter.flush();
             csvWriter.close();
 
+
             // Retrieve the CSV data as a byte array
             byte[] byteArray = byteOutputStream.toByteArray();
             return byteArray;

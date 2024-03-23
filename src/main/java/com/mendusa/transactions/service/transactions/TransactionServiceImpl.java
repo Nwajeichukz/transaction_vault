@@ -35,9 +35,8 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public AppResponse<String> getAndSendToMail() {
-        // todo: this is not readable
-        byte[] resultByteArray = Utils.writeToCsv(getListOfTransactions());
 
+        byte[] resultByteArray = attachmentInByteArray();
 
         EmailDto emailDto = EmailDto.builder()
                 .recipient("nwajeigoddowell@gmail.com")
@@ -58,11 +57,14 @@ public class TransactionServiceImpl implements TransactionService {
 
 
     private List<RecentTransactionResponse> getListOfTransactions() {
-        Page<RecentTransactionResponse> page = repository.findAll( //todo: this page variable is unneccesary
-                PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id"))).map(RecentTransactionResponse::new);
+        return repository.findAll(
+                PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+                .map(RecentTransactionResponse::new)
+                .getContent();
+    }
 
-
-        return page.getContent();
+    private byte[] attachmentInByteArray(){
+        return Utils.writeToCsv(getListOfTransactions());
     }
 
 }
