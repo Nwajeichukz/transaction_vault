@@ -1,6 +1,7 @@
 package com.mendusa.transactions.service.transactions;
 
 import com.mendusa.transactions.dto.AppResponse;
+import com.mendusa.transactions.dto.ByteAttachmentAndFileNameDto;
 import com.mendusa.transactions.dto.EmailDto;
 import com.mendusa.transactions.dto.RecentTransactionResponse;
 import com.mendusa.transactions.repository.TransactionRepository;
@@ -8,7 +9,6 @@ import com.mendusa.transactions.service.email.EmailServiceImpl;
 import com.mendusa.transactions.utils.Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -36,13 +36,14 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public AppResponse<String> getAndSendToMail() {
 
-        byte[] resultByteArray = attachmentInByteArray();
+        ByteAttachmentAndFileNameDto resultByteArray = Utils.writeToCsv(getListOfTransactions());
+        List<ByteAttachmentAndFileNameDto> resultByteArrayInAlist = List.of(resultByteArray);
 
         EmailDto emailDto = EmailDto.builder()
                 .recipient("nwajeigoddowell@gmail.com")
                 .subject("RECEIPT")
                 .messageBody("Here is your receipts for your last 10 transactions")
-                .attachment(resultByteArray) //todo: attachment cannot always be singular
+                .attachment(resultByteArrayInAlist)
                 .build();
 
         try{
@@ -61,10 +62,6 @@ public class TransactionServiceImpl implements TransactionService {
                 PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
                 .map(RecentTransactionResponse::new)
                 .getContent();
-    }
-
-    private byte[] attachmentInByteArray(){
-        return Utils.writeToCsv(getListOfTransactions());
     }
 
 }

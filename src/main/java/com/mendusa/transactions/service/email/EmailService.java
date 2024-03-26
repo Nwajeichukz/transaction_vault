@@ -2,6 +2,7 @@ package com.mendusa.transactions.service.email;
 
 
 
+import com.mendusa.transactions.dto.ByteAttachmentAndFileNameDto;
 import com.mendusa.transactions.dto.EmailDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,8 @@ import org.thymeleaf.TemplateEngine;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.io.ByteArrayInputStream;
+import java.util.List;
 import java.util.Objects;
 
 
@@ -41,11 +44,12 @@ public class EmailService implements EmailServiceImpl {
             helper.setText(emailDto.getMessageBody());
 
 
-            ByteArrayResource fileAttachment = new ByteArrayResource(emailDto.getAttachment());
+            for (ByteAttachmentAndFileNameDto attachments : emailDto.getAttachment()){
+                ByteArrayResource fileAttachment = new ByteArrayResource(attachments.getAttachment());
+                helper.addAttachment(attachments.getFileName(), fileAttachment);
+            }
 
-
-
-            helper.addAttachment("data.csv", fileAttachment); //todo : attachment name should not be hard-coded
+//            helper.addAttachment("data.csv", fileAttachment);
 
             javaMailSender.send(message);
 
