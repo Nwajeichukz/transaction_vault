@@ -1,8 +1,7 @@
 package com.mendusa.transactions.utils;
 
-import com.mendusa.transactions.dto.ByteAttachmentAndFileNameDto;
+import com.mendusa.transactions.dto.FileNameAndAttachment;
 import com.opencsv.CSVWriter;
-import com.sun.xml.bind.v2.TODO;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -19,37 +18,38 @@ import java.util.List;
 @RequiredArgsConstructor
 public class Utils {
 
-    public static ByteAttachmentAndFileNameDto writeToCsv(List<?> data) {
+    public static FileNameAndAttachment writeToCsv(List<?> data) {
 
-        try (ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
-             CSVWriter csvWriter = new CSVWriter(new OutputStreamWriter(byteOutputStream, StandardCharsets.UTF_8));
-        ){
+
+        try(ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
+            CSVWriter csvWriter = new CSVWriter(new OutputStreamWriter(byteOutputStream, StandardCharsets.UTF_8))
+            ){
+
             // Write the header
             csvWriter.writeNext(headerOfReceipt(data));
+
 
             for (String[] csvData : getFieldsValue(data)) {
                 csvWriter.writeNext(csvData);
             }
 
-
-            // Retrieve the CSV data as a byte array
-            byte[] resultByteArray = byteOutputStream.toByteArray();
-
             String fileName = "data.csv";
 
-            ByteAttachmentAndFileNameDto byteAttachmentAndFileNameDto = new ByteAttachmentAndFileNameDto(fileName, resultByteArray);
+            // Retrieve the CSV data as a byte array
+            byte[] toByte = byteOutputStream.toByteArray();
 
-            return byteAttachmentAndFileNameDto;
+
+            return new FileNameAndAttachment(fileName, toByte);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return new ByteAttachmentAndFileNameDto("",new byte[]{});
+        return new FileNameAndAttachment("", new byte[]{});
 
     }
 
-    public static ByteAttachmentAndFileNameDto writeToExcelSheet(List<?> data)  {
+    public static byte[] writeToExcelSheet(List<?> data)  {
 
         String[] header = headerOfReceipt(data);
 
@@ -71,7 +71,7 @@ public class Utils {
             //creating DATA ROWS FOR EACH
             for (String[] dataValues : ListOfValues) {
                 Row row = sheet.createRow(numRow++);
-                int numCell = 1;
+                int numCell = 0;
                 for (String values : dataValues) {
                     Cell cell = row.createCell(numCell++);
                     cell.setCellValue(values);
@@ -81,19 +81,13 @@ public class Utils {
             workbook.write(byteArrayOutputStream);
 
             // Get the resulting byte array
-            byte[] resultByteArray = byteArrayOutputStream.toByteArray();
-
-            String fileName = "data.xlsx";
-
-            ByteAttachmentAndFileNameDto byteAttachmentAndFileNameDto = new ByteAttachmentAndFileNameDto(fileName, resultByteArray);
-
-            return byteAttachmentAndFileNameDto;
+            return byteArrayOutputStream.toByteArray();
 
         } catch (IOException ex) {
             ex.printStackTrace();
         }
 
-        return new ByteAttachmentAndFileNameDto("",new byte[]{});
+        return new byte[]{};
     }
 
 

@@ -1,8 +1,8 @@
 package com.mendusa.transactions.service.transactions;
 
 import com.mendusa.transactions.dto.AppResponse;
-import com.mendusa.transactions.dto.ByteAttachmentAndFileNameDto;
 import com.mendusa.transactions.dto.EmailDto;
+import com.mendusa.transactions.dto.FileNameAndAttachment;
 import com.mendusa.transactions.dto.RecentTransactionResponse;
 import com.mendusa.transactions.repository.TransactionRepository;
 import com.mendusa.transactions.service.email.EmailServiceImpl;
@@ -36,8 +36,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public AppResponse<String> getAndSendToMail() {
 
-        ByteAttachmentAndFileNameDto resultByteArray = Utils.writeToCsv(getListOfTransactions());
-        List<ByteAttachmentAndFileNameDto> resultByteArrayInAlist = List.of(resultByteArray);
+        List<FileNameAndAttachment> resultByteArrayInAlist = List.of(Utils.writeToCsv(getListOfTransactions()));
 
         EmailDto emailDto = EmailDto.builder()
                 .recipient("nwajeigoddowell@gmail.com")

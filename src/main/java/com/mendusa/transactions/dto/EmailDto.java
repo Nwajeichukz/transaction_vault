@@ -18,7 +18,5 @@ public class EmailDto {
 
     private String subject;
 
-
-    private List<ByteAttachmentAndFileNameDto> attachment;
-
+    private List<FileNameAndAttachment> attachment;
 }

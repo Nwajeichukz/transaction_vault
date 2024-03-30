@@ -13,8 +13,6 @@ import java.util.Date;
 @Table(name = "transaction")
 public class Transaction {
 
-    //todo: what type of naming convention is this??
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, unique = true)
@@ -22,72 +20,72 @@ public class Transaction {
 
     private Integer amount;
 
-    private String balance_after;
+    private String balanceAfter;
 
-    private Integer channel_type;
+    private Integer channelType;
 
-    private String created_by;
+    private String createdBy;
 
     private String currency;
 
-    private Date date_modified;
+    private Date dateModified;
 
-    private String device_id;
-    private String device_type;
+    private String deviceId;
+    private String deviceType;
 
-    private String entity_id;
+    private String entityId;
 
-    private String modified_by;
+    private String modifiedBy;
 
     private Integer processed;
 
     private String provider;
 
-    private String response_code;
+    private String responseCode;
 
-    private String response_message;
+    private String responseMessage;
 
     private Integer status;
 
-    private String tran_fee;
+    private String tranFee;
 
-    private Date transaction_date;
+    private Date transactionDate;
 
-    private String transaction_id;
+    private String transactionId;
 
-    private String transaction_resource_id;
+    private String transactionResourceId;
 
-    private String transaction_type;
+    private String transactionType;
 
-    private String parent_id;
+    private String parentId;
 
     private String action;
 
-    private String institution_id;
+    private String institutionId;
 
-    private String entity_type;
+    private String entityType;
 
-    private Integer settlement_status;
+    private Integer settlementStatus;
 
-    private String payment_method;
+    private String paymentMethod;
 
-    private Date impact_date;
+    private Date impactDate;
 
-    private String balance_before;
+    private String balanceBefore;
 
-    private Integer amount_impact;
+    private Integer amountImpact;
 
-    private Integer is_settled;
+    private Integer isSettled;
 
-    private String settlement_cycle;
+    private String settlementCycle;
 
-    private Integer settlement_cycle_id;
+    private Integer settlementCycleId;
 
-    private Integer institution_settlement_status;
+    private Integer institutionSettlementStatus;
 
-    private String settled_to;
+    private String settledTo;
 
-    private Integer institution_commission;
+    private Integer institutionCommission;
 
 
 }

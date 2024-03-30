@@ -2,23 +2,18 @@ package com.mendusa.transactions.service.email;
 
 
 
-import com.mendusa.transactions.dto.ByteAttachmentAndFileNameDto;
 import com.mendusa.transactions.dto.EmailDto;
+import com.mendusa.transactions.dto.FileNameAndAttachment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.thymeleaf.TemplateEngine;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import java.io.ByteArrayInputStream;
-import java.util.List;
-import java.util.Objects;
 
 
 @Component
@@ -31,7 +26,7 @@ public class EmailService implements EmailServiceImpl {
     @Async
     @Override
     public void sendToEmail(EmailDto emailDto){
-
+            boolean choice = true;
 
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
@@ -44,12 +39,10 @@ public class EmailService implements EmailServiceImpl {
             helper.setText(emailDto.getMessageBody());
 
 
-            for (ByteAttachmentAndFileNameDto attachments : emailDto.getAttachment()){
+            for (FileNameAndAttachment attachments : emailDto.getAttachment()){
                 ByteArrayResource fileAttachment = new ByteArrayResource(attachments.getAttachment());
                 helper.addAttachment(attachments.getFileName(), fileAttachment);
             }
-
-//            helper.addAttachment("data.csv", fileAttachment);
 
             javaMailSender.send(message);
 

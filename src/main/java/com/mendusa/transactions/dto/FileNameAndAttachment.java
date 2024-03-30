@@ -2,12 +2,13 @@ package com.mendusa.transactions.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
-public class ByteAttachmentAndFileNameDto {
+@NoArgsConstructor
+public class FileNameAndAttachment {
     private String fileName;
-
     private byte[] attachment;
 
 
