@@ -38,12 +38,6 @@ public class MailSenderConfiguration {
         mailSender.setPassword(password);
 
 
-        Properties props = mailSender.getJavaMailProperties();
-        props.put("mail.transport.protocol", "smtp");// todo: use a config file for this
-        props.put("mail.smtp.auth", "true");// todo: use a config file for this
-        props.put("mail.smtp.starttls.enable", "true");// todo: use a config file for this
-        props.put("mail.debug", "true");// todo: use a config file for this
-
         return mailSender;
     }
 }

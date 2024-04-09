@@ -5,7 +5,7 @@ import com.mendusa.transactions.dto.EmailDto;
 import com.mendusa.transactions.dto.FileNameAndAttachment;
 import com.mendusa.transactions.dto.RecentTransactionResponse;
 import com.mendusa.transactions.repository.TransactionRepository;
-import com.mendusa.transactions.service.email.EmailServiceImpl;
+import com.mendusa.transactions.service.email.EmailService;
 import com.mendusa.transactions.utils.Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository repository;
 
-    private final EmailServiceImpl emailService;
+    private final EmailService emailService;
 
 
     @Override
