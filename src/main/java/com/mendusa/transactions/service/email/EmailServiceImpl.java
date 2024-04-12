@@ -3,9 +3,10 @@ package com.mendusa.transactions.service.email;
 
 
 import com.mendusa.transactions.dto.EmailDto;
-import com.mendusa.transactions.dto.FileNameAndAttachment;
+import com.mendusa.transactions.dto.FileAttachment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -16,38 +17,36 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender javaMailSender;
 
     @Async
     @Override
-    public void sendToEmail(EmailDto emailDto){
-            boolean choice = true;
-
+    public void sendAsync(EmailDto emailDto){
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
 
-            MimeMessageHelper helper = new MimeMessageHelper(message, true); //todo: set to true only when there's attachment
+            MimeMessageHelper helper = new MimeMessageHelper(message, CollectionUtils.isNotEmpty(emailDto.getAttachment()));
 
-            helper.setFrom("nwajeigoddowell@gmail.com");
+            helper.setFrom("nwajeigoddowell@gmail.com");// todo: put in properties file
             helper.setTo(emailDto.getRecipient());
             helper.setSubject(emailDto.getSubject());
             helper.setText(emailDto.getMessageBody());
 
 
-            for (FileNameAndAttachment attachments : emailDto.getAttachment()){
+            for (FileAttachment attachments : emailDto.getAttachment()){
                 ByteArrayResource fileAttachment = new ByteArrayResource(attachments.getAttachment());
                 helper.addAttachment(attachments.getFileName(), fileAttachment);
             }
 
             javaMailSender.send(message);
 
-        } catch (MessagingException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            log.error("An error occurred while trying to send mail {}", e.getMessage());
         }
     }
 }

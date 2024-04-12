@@ -7,5 +7,5 @@ import javax.mail.MessagingException;
 
 
 public interface EmailService {
-    void sendToEmail(EmailDto  emailDto) throws MessagingException;
+    void sendAsync(EmailDto  emailDto) ;
 }

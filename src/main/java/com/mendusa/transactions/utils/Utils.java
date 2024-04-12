@@ -1,6 +1,6 @@
 package com.mendusa.transactions.utils;
 
-import com.mendusa.transactions.dto.FileNameAndAttachment;
+import com.mendusa.transactions.dto.FileAttachment;
 import com.opencsv.CSVWriter;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
@@ -18,7 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class Utils {
 
-    public static FileNameAndAttachment writeToCsv(List<?> data) {
+    public static byte[] writeToCsv(List<?> data) {
 
 
         try(ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
@@ -33,19 +33,17 @@ public class Utils {
                 csvWriter.writeNext(csvData);
             }
 
-            String fileName = "data.csv";
 
             // Retrieve the CSV data as a byte array
-            byte[] toByte = byteOutputStream.toByteArray();
+            return  byteOutputStream.toByteArray();
 
 
-            return new FileNameAndAttachment(fileName, toByte);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return new FileNameAndAttachment("", new byte[]{});
+        return  new byte[]{};
 
     }
 

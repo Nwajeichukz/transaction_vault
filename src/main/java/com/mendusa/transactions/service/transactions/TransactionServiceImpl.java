@@ -2,18 +2,19 @@ package com.mendusa.transactions.service.transactions;
 
 import com.mendusa.transactions.dto.AppResponse;
 import com.mendusa.transactions.dto.EmailDto;
-import com.mendusa.transactions.dto.FileNameAndAttachment;
+import com.mendusa.transactions.dto.FileAttachment;
 import com.mendusa.transactions.dto.RecentTransactionResponse;
 import com.mendusa.transactions.repository.TransactionRepository;
 import com.mendusa.transactions.service.email.EmailService;
 import com.mendusa.transactions.utils.Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import javax.mail.MessagingException;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -36,21 +37,12 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public AppResponse<String> getAndSendToMail() {
 
-        List<FileNameAndAttachment> resultByteArrayInAlist = List.of(Utils.writeToCsv(getListOfTransactions()));
+        byte[] fileContent = Utils.writeToCsv(getListOfTransactions());
+        final FileAttachment attachment = new FileAttachment(
+                RandomStringUtils.randomAlphanumeric(25).concat(".csv"),
+                fileContent);
 
-        EmailDto emailDto = EmailDto.builder()
-                .recipient("nwajeigoddowell@gmail.com")
-                .subject("RECEIPT")
-                .messageBody("Here is your receipts for your last 10 transactions")
-                .attachment(resultByteArrayInAlist)
-                .build();
-
-        try{
-            emailService.sendToEmail(emailDto);
-        }catch(MessagingException e){
-            e.printStackTrace();
-        }
-
+        this.sendTransactionFile(attachment);
         return new AppResponse<>(0, "successful");
 
     }
@@ -61,6 +53,19 @@ public class TransactionServiceImpl implements TransactionService {
                 PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
                 .map(RecentTransactionResponse::new)
                 .getContent();
+    }
+
+    private void sendTransactionFile( final FileAttachment attachment) {
+        EmailDto emailDto = EmailDto.builder()
+                .recipient("nwajeigoddowell@gmail.com")
+                .subject("RECEIPT")
+                .messageBody("Here is your receipts for your last 10 transactions") // todo use an html template later
+                .attachment(Collections.singletonList(attachment))
+                .build();
+
+            emailService.sendAsync(emailDto); // todo:  add an async error handler
+
+
     }
 
 }

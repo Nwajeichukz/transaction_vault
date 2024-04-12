@@ -7,9 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class FileNameAndAttachment {
+public class FileAttachment {
     private String fileName;
     private byte[] attachment;
-
-
 }
