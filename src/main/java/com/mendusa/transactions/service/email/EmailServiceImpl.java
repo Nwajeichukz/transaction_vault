@@ -7,6 +7,7 @@ import com.mendusa.transactions.dto.FileAttachment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -24,6 +25,9 @@ public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender javaMailSender;
 
+    @Value("${spring.mail.username}")
+    private String sender;
+
     @Async
     @Override
     public void sendAsync(EmailDto emailDto){
@@ -32,7 +36,7 @@ public class EmailServiceImpl implements EmailService {
 
             MimeMessageHelper helper = new MimeMessageHelper(message, CollectionUtils.isNotEmpty(emailDto.getAttachment()));
 
-            helper.setFrom("nwajeigoddowell@gmail.com");// todo: put in properties file
+            helper.setFrom(sender);
             helper.setTo(emailDto.getRecipient());
             helper.setSubject(emailDto.getSubject());
             helper.setText(emailDto.getMessageBody());

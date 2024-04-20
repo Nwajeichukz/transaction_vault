@@ -59,11 +59,11 @@ public class TransactionServiceImpl implements TransactionService {
         EmailDto emailDto = EmailDto.builder()
                 .recipient("nwajeigoddowell@gmail.com")
                 .subject("RECEIPT")
-                .messageBody("Here is your receipts for your last 10 transactions") // todo use an html template later
+                .messageBody("Here is your receipts for your last 10 transactions") // todo: use an html template later
                 .attachment(Collections.singletonList(attachment))
                 .build();
 
-            emailService.sendAsync(emailDto); // todo:  add an async error handler
+                emailService.sendAsync(emailDto);
 
 
     }

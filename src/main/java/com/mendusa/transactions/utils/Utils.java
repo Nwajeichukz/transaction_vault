@@ -33,11 +33,8 @@ public class Utils {
                 csvWriter.writeNext(csvData);
             }
 
-
             // Retrieve the CSV data as a byte array
             return  byteOutputStream.toByteArray();
-
-
 
         } catch (IOException e) {
             e.printStackTrace();

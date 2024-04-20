@@ -21,7 +21,6 @@ public class TransactionController {
 
     private final TransactionService transaction;
 
-    //
     @GetMapping("/recentTransaction")
     public ResponseEntity<AppResponse<List<RecentTransactionResponse>>> getRecentTransaction() {
         return ResponseEntity.ok(transaction.getTransactionList());
