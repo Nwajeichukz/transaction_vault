@@ -87,5 +87,4 @@ public class Transaction {
 
     private Integer institutionCommission;
 
-
 }

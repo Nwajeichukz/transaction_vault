@@ -1,8 +1,12 @@
 package com.mendusa.transactions.utils;
 
-import com.mendusa.transactions.dto.FileAttachment;
+import com.mendusa.transactions.dto.PaymentRateResponse;
+import com.mendusa.transactions.dto.PaymentRateCount;
+import com.mendusa.transactions.dto.TransactionDto;
+import com.mendusa.transactions.entity.Transaction;
 import com.opencsv.CSVWriter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -12,9 +16,11 @@ import org.springframework.stereotype.Component;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class Utils {
 
@@ -125,6 +131,81 @@ public class Utils {
 
 
         return result;
+    }
+
+    public static List<PaymentRateCount> getMethodSuccessRate(List<Transaction> objectList, String paymentMethod){
+        List<PaymentRateCount> rateCountList = new ArrayList<>();
+
+        log.info("--> total amount of transaction {}", objectList.size());
+
+        int total  = 0;
+        int success = 0;
+
+        for (Transaction transaction: objectList) {
+            String getMethod = transaction.getPaymentMethod();
+            if (getMethod.equalsIgnoreCase(paymentMethod)){
+                total++;
+                if (transaction.getResponseCode().startsWith("0")) success++;
+            }
+        }
+
+
+
+        PaymentRateCount paymentRateCount = new PaymentRateCount(paymentMethod,total,success);
+        rateCountList.add(paymentRateCount);
+
+        log.info("--> total total {}", total);
+        log.info("--> total success {}", success);
+        return rateCountList;
+    }
+
+
+    public static List<PaymentRateCount> getProviderSuccess(List<Transaction> objectList, String provider){
+        List<PaymentRateCount> rateCountList = new ArrayList<>();
+
+
+        int total  = 0;
+        int success = 0;
+
+        for (Transaction transaction: objectList) {
+            String getProvider = transaction.getProvider();
+            if (getProvider.equalsIgnoreCase(provider)){
+                total++;
+                if (transaction.getResponseCode().startsWith("0")) success++;
+            }
+        }
+        PaymentRateCount paymentRateCount = new PaymentRateCount(provider,total,success);
+        rateCountList.add(paymentRateCount);
+
+        return rateCountList;
+    }
+    public static List<PaymentRateResponse> calculateSuccessAndFailedPercentage(List<List<PaymentRateCount>> rateCountList){
+        List<PaymentRateResponse> transactionList = new ArrayList<>();
+
+        for (List<PaymentRateCount> listOfPaymentCount: rateCountList) {
+            for (PaymentRateCount paymentRateCount : listOfPaymentCount) {
+                int total = paymentRateCount.getTotal();
+                int success = paymentRateCount.getSuccess();
+                String successPercentage = calculatePercentage(total, success) + "%";
+                String failedPercentage = calculatePercentage(total,
+                        (total - success)) + "%";
+                PaymentRateResponse paymentRateResponse = PaymentRateResponse.builder()
+                        .name(paymentRateCount.getPayMethod())
+                        .success(successPercentage)
+                        .failed(failedPercentage)
+                        .build();
+
+                transactionList.add(paymentRateResponse);
+            }
+        }
+        return transactionList;
+    }
+
+
+    private static int calculatePercentage(int totalTransaction, int successFullTransaction){
+//        log.info("--> options after setting to shuffled list {}", totalTransaction);
+
+        return (100 * successFullTransaction)/totalTransaction;
     }
 
 }

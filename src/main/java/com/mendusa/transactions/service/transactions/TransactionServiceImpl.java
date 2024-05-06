@@ -1,9 +1,7 @@
 package com.mendusa.transactions.service.transactions;
 
-import com.mendusa.transactions.dto.AppResponse;
-import com.mendusa.transactions.dto.EmailDto;
-import com.mendusa.transactions.dto.FileAttachment;
-import com.mendusa.transactions.dto.RecentTransactionResponse;
+import com.mendusa.transactions.dto.*;
+import com.mendusa.transactions.entity.Transaction;
 import com.mendusa.transactions.repository.TransactionRepository;
 import com.mendusa.transactions.service.email.EmailService;
 import com.mendusa.transactions.utils.Utils;
@@ -14,8 +12,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -23,7 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
 
-    private final TransactionRepository repository;
+    private final TransactionRepository transactionRepository;
 
     private final EmailService emailService;
 
@@ -47,9 +45,20 @@ public class TransactionServiceImpl implements TransactionService {
 
     }
 
+    @Override
+    public AppResponse<List<PaymentRateResponse>> methodSuccessRate() {
+
+        return new AppResponse<>(0, "Successful", getMethodSuccessRate() );
+    }
+
+    @Override
+    public AppResponse<List<PaymentRateResponse>> providerSuccessRate() {
+        return new AppResponse<>(0, "Successful", getProviderSuccessRate());
+    }
+
 
     private List<RecentTransactionResponse> getListOfTransactions() {
-        return repository.findAll(
+        return transactionRepository.findAll(
                 PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
                 .map(RecentTransactionResponse::new)
                 .getContent();
@@ -67,5 +76,51 @@ public class TransactionServiceImpl implements TransactionService {
 
 
     }
+
+    private List<PaymentRateResponse> getMethodSuccessRate(){
+        List<String> paymentsMethods = List.of("CARD","TRANSFER", "PAYWITHTRANSFER");
+
+        List<List<PaymentRateCount>> totalTransactionList = new ArrayList<>();
+
+        for (String paymentMethod: paymentsMethods) {
+           totalTransactionList.add(Utils.getMethodSuccessRate(transactionDtoList(), paymentMethod));
+        }
+
+        return Utils.calculateSuccessAndFailedPercentage(totalTransactionList);
+
+    }
+
+    private List<PaymentRateResponse> getProviderSuccessRate(){
+        List<String> paymentProviders = List.of("LOTUS BANK", "FCMB", "NIBSS", "MAGTIPON", "BUILD MFB", "PARALLEX", "MEDUSA_FCMB",
+                "OPTIMUS BANK","NAVYMFB", "INTERSWITCH", "Build", "MEDUSA_FCMB_ONUS", "INTERSWITCH_SUPER", "MEDUSA_ACCESS", "NIBSSMEDUSA",
+                "INTERSWITCHSL", "Providus Bank", "TAJBank");
+
+        List<List<PaymentRateCount>> totalTransactionList = new ArrayList<>();
+
+        for (String paymentProvider: paymentProviders) {
+            totalTransactionList.add(Utils.getProviderSuccess(transactionDtoList(), paymentProvider));
+
+        }
+
+        return Utils.calculateSuccessAndFailedPercentage(totalTransactionList);
+    }
+
+    private List<Transaction> transactionDtoList() {
+//
+//        Calendar cal = Calendar.getInstance();
+//        cal.add(Calendar.HOUR_OF_DAY, -24);
+//        Date last24Hours = cal.getTime();
+//        return transactionRepository.findByTransactionDateAfter(last24Hours);
+
+
+//        return transactionRepository.findAll().stream()
+//                .map(TransactionDto::new).collect(Collectors.toList());
+
+        return transactionRepository.findAll();
+
+    }
+
+
+
 
 }
