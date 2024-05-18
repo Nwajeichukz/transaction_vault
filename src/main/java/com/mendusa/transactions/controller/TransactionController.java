@@ -3,6 +3,7 @@ package com.mendusa.transactions.controller;
 import com.mendusa.transactions.dto.AppResponse;
 import com.mendusa.transactions.dto.RecentTransactionResponse;
 import com.mendusa.transactions.dto.PaymentRateResponse;
+import com.mendusa.transactions.repository.TransactionRepository;
 import com.mendusa.transactions.service.transactions.TransactionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,8 @@ public class TransactionController {
 
 
     private final TransactionService transaction;
+
+    private final TransactionRepository transactionRepository;
 
     @GetMapping("/recentTransaction")
     public ResponseEntity<AppResponse<List<RecentTransactionResponse>>> getRecentTransaction() {
@@ -43,6 +46,4 @@ public class TransactionController {
     public ResponseEntity<AppResponse<List<PaymentRateResponse>>> getProviderSuccessRate(){
         return ResponseEntity.ok(transaction.providerSuccessRate());
     }
-
-
 }

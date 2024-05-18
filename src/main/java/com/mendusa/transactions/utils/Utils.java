@@ -12,7 +12,10 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.javatuples.Triplet;
 import org.springframework.stereotype.Component;
+
+import javax.persistence.Tuple;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
@@ -21,7 +24,6 @@ import java.util.List;
 
 @Component
 @Slf4j
-@RequiredArgsConstructor
 public class Utils {
 
     public static byte[] writeToCsv(List<?> data) {
@@ -133,7 +135,8 @@ public class Utils {
         return result;
     }
 
-    public static List<PaymentRateCount> getMethodSuccessRate(List<Transaction> objectList, String paymentMethod){
+
+    public static List<PaymentRateCount> getMethodSuccessRate(List<Tuple> objectList, String paymentMethod){
         List<PaymentRateCount> rateCountList = new ArrayList<>();
 
         log.info("--> total amount of transaction {}", objectList.size());
@@ -141,15 +144,16 @@ public class Utils {
         int total  = 0;
         int success = 0;
 
-        for (Transaction transaction: objectList) {
-            String getMethod = transaction.getPaymentMethod();
-            if (getMethod.equalsIgnoreCase(paymentMethod)){
-                total++;
-                if (transaction.getResponseCode().startsWith("0")) success++;
+        for (Tuple transaction: objectList) {
+            String response = transaction.get("responseCode", String.class);
+            String getPaymentMethod = transaction.get("paymentMethod", String.class);
+            Long totalSuccess = transaction.get("totalCount", Long.class);
+
+            if (getPaymentMethod.equalsIgnoreCase(paymentMethod)){
+                total += totalSuccess;
+                if ("00".equals(response)) success += totalSuccess;
             }
         }
-
-
 
         PaymentRateCount paymentRateCount = new PaymentRateCount(paymentMethod,total,success);
         rateCountList.add(paymentRateCount);
@@ -160,19 +164,26 @@ public class Utils {
     }
 
 
-    public static List<PaymentRateCount> getProviderSuccess(List<Transaction> objectList, String provider){
+    public static List<PaymentRateCount> getProviderSuccess(List<Tuple> objectList, String provider){
         List<PaymentRateCount> rateCountList = new ArrayList<>();
-
 
         int total  = 0;
         int success = 0;
 
-        for (Transaction transaction: objectList) {
-            String getProvider = transaction.getProvider();
+        for (Tuple transaction: objectList) {
+            String response = transaction.get("responseCode", String.class);
+            String getProvider = transaction.get("provider", String.class);
+            Long totalSuccess = transaction.get("totalCount", Long.class);
+
+            if (getProvider==null) getProvider = "providerNull";
+
             if (getProvider.equalsIgnoreCase(provider)){
-                total++;
-                if (transaction.getResponseCode().startsWith("0")) success++;
+                total += totalSuccess;
+                if ("00".equals(response)) success += totalSuccess;
             }
+
+            if ("INTERSWITCHSL".equals(provider)) log.info("--> total amount of transaction {}", success);
+
         }
         PaymentRateCount paymentRateCount = new PaymentRateCount(provider,total,success);
         rateCountList.add(paymentRateCount);
@@ -194,6 +205,7 @@ public class Utils {
                         .success(successPercentage)
                         .failed(failedPercentage)
                         .build();
+               String can =  "where the transaction is valid";
 
                 transactionList.add(paymentRateResponse);
             }
@@ -204,8 +216,11 @@ public class Utils {
 
     private static int calculatePercentage(int totalTransaction, int successFullTransaction){
 //        log.info("--> options after setting to shuffled list {}", totalTransaction);
+        if(totalTransaction == 0) return 0;
 
         return (100 * successFullTransaction)/totalTransaction;
     }
+
+
 
 }
