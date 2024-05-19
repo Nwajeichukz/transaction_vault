@@ -10,23 +10,22 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RecentTransactionResponse {
-    // todo: why are you like this sef, i told about this naming convention and you didn't change it
-    private String response_code;
+    private String responseCode;
 
-    private String transaction_date;
+    private String transactionDate;
 
-    private String transaction_id;
+    private String transactionId;
 
     private String amount;
 
-    private String payment_method;
+    private String paymentMethod;
 
     public RecentTransactionResponse(Transaction transaction) {
-        this.response_code = transaction.getResponse_code();
-        this.transaction_date = transaction.getTransaction_date().toString();
-        this.transaction_id = transaction.getTransaction_id();
+        this.responseCode = transaction.getResponseCode();
+        this.transactionDate = transaction.getTransactionDate().toString();
+        this.transactionId = transaction.getTransactionId();
         this.amount = transaction.getAmount().toString();
-        this.payment_method = transaction.getPayment_method();
+        this.paymentMethod = transaction.getPaymentMethod();
     }
 
 

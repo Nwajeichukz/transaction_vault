@@ -1,50 +1,54 @@
 package com.mendusa.transactions.utils;
 
+import com.mendusa.transactions.dto.PaymentRateResponse;
+import com.mendusa.transactions.dto.PaymentRateCount;
+import com.mendusa.transactions.dto.TransactionDto;
+import com.mendusa.transactions.entity.Transaction;
 import com.opencsv.CSVWriter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.javatuples.Triplet;
 import org.springframework.stereotype.Component;
+
+import javax.persistence.Tuple;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
-@RequiredArgsConstructor
+@Slf4j
 public class Utils {
 
     public static byte[] writeToCsv(List<?> data) {
 
-        try {
-            // Create a byte array output stream to hold CSV data
-            ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
 
-            // Create a CSV writer with OutputStreamWriter wrapping the byte array output stream
-            CSVWriter csvWriter = new CSVWriter(new OutputStreamWriter(byteOutputStream, StandardCharsets.UTF_8));
+        try(ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
+            CSVWriter csvWriter = new CSVWriter(new OutputStreamWriter(byteOutputStream, StandardCharsets.UTF_8))
+            ){
+
             // Write the header
             csvWriter.writeNext(headerOfReceipt(data));
+
 
             for (String[] csvData : getFieldsValue(data)) {
                 csvWriter.writeNext(csvData);
             }
 
-            // Flush and close the CSV writer
-            csvWriter.flush();
-            csvWriter.close();
-
             // Retrieve the CSV data as a byte array
-            byte[] byteArray = byteOutputStream.toByteArray();
-            return byteArray;
+            return  byteOutputStream.toByteArray();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return new byte[]{};
+        return  new byte[]{};
 
     }
 
@@ -70,7 +74,7 @@ public class Utils {
             //creating DATA ROWS FOR EACH
             for (String[] dataValues : ListOfValues) {
                 Row row = sheet.createRow(numRow++);
-                int numCell = 1;
+                int numCell = 0;
                 for (String values : dataValues) {
                     Cell cell = row.createCell(numCell++);
                     cell.setCellValue(values);
@@ -80,9 +84,7 @@ public class Utils {
             workbook.write(byteArrayOutputStream);
 
             // Get the resulting byte array
-            byte[] resultByteArray = byteArrayOutputStream.toByteArray();
-
-            return resultByteArray;
+            return byteArrayOutputStream.toByteArray();
 
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -132,5 +134,93 @@ public class Utils {
 
         return result;
     }
+
+
+    public static List<PaymentRateCount> getMethodSuccessRate(List<Tuple> objectList, String paymentMethod){
+        List<PaymentRateCount> rateCountList = new ArrayList<>();
+
+        log.info("--> total amount of transaction {}", objectList.size());
+
+        int total  = 0;
+        int success = 0;
+
+        for (Tuple transaction: objectList) {
+            String response = transaction.get("responseCode", String.class);
+            String getPaymentMethod = transaction.get("paymentMethod", String.class);
+            Long totalSuccess = transaction.get("totalCount", Long.class);
+
+            if (getPaymentMethod.equalsIgnoreCase(paymentMethod)){
+                total += totalSuccess;
+                if ("00".equals(response)) success += totalSuccess;
+            }
+        }
+
+        PaymentRateCount paymentRateCount = new PaymentRateCount(paymentMethod,total,success);
+        rateCountList.add(paymentRateCount);
+
+        log.info("--> total total {}", total);
+        log.info("--> total success {}", success);
+        return rateCountList;
+    }
+
+
+    public static List<PaymentRateCount> getProviderSuccess(List<Tuple> objectList, String provider){
+        List<PaymentRateCount> rateCountList = new ArrayList<>();
+
+        int total  = 0;
+        int success = 0;
+
+        for (Tuple transaction: objectList) {
+            String response = transaction.get("responseCode", String.class);
+            String getProvider = transaction.get("provider", String.class);
+            Long totalSuccess = transaction.get("totalCount", Long.class);
+
+            if (getProvider==null) getProvider = "providerNull";
+
+            if (getProvider.equalsIgnoreCase(provider)){
+                total += totalSuccess;
+                if ("00".equals(response)) success += totalSuccess;
+            }
+
+            if ("INTERSWITCHSL".equals(provider)) log.info("--> total amount of transaction {}", success);
+
+        }
+        PaymentRateCount paymentRateCount = new PaymentRateCount(provider,total,success);
+        rateCountList.add(paymentRateCount);
+
+        return rateCountList;
+    }
+    public static List<PaymentRateResponse> calculateSuccessAndFailedPercentage(List<List<PaymentRateCount>> rateCountList){
+        List<PaymentRateResponse> transactionList = new ArrayList<>();
+
+        for (List<PaymentRateCount> listOfPaymentCount: rateCountList) {
+            for (PaymentRateCount paymentRateCount : listOfPaymentCount) {
+                int total = paymentRateCount.getTotal();
+                int success = paymentRateCount.getSuccess();
+                String successPercentage = calculatePercentage(total, success) + "%";
+                String failedPercentage = calculatePercentage(total,
+                        (total - success)) + "%";
+                PaymentRateResponse paymentRateResponse = PaymentRateResponse.builder()
+                        .name(paymentRateCount.getPayMethod())
+                        .success(successPercentage)
+                        .failed(failedPercentage)
+                        .build();
+               String can =  "where the transaction is valid";
+
+                transactionList.add(paymentRateResponse);
+            }
+        }
+        return transactionList;
+    }
+
+
+    private static int calculatePercentage(int totalTransaction, int successFullTransaction){
+//        log.info("--> options after setting to shuffled list {}", totalTransaction);
+        if(totalTransaction == 0) return 0;
+
+        return (100 * successFullTransaction)/totalTransaction;
+    }
+
+
 
 }

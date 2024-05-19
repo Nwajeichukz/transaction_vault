@@ -5,18 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class EmailDto {
-    private String recipient;
+public class PaymentRateResponse {
+    private String name;
+    private String success;
+    private String failed;
 
-    private String messageBody;
 
-    private String subject;
 
-    private List<FileAttachment> attachment;
 }

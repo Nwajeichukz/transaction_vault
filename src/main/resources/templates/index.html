@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Email with Embedded CSV</title>
+    <title>Email Tmeplate</title>
 </head>
 <body>
-<h1>Email with Embedded CSV</h1>
-<p>This email contains an embedded CSV file:</p>
-<a th:href="'data:text/csv;base64,' + ${encodedCsv}" download="data.csv">Download CSV</a>
+<h1>hello<span th:text="${name}">User</span>!</h1>
+<p>This email contains a file attachment:</p>
+<!--<a th:href="'data:text/csv;base64,' + ${encodedCsv}" download="data.csv">Download CSV</a>-->
 </body>
 </html>
