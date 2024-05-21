@@ -45,4 +45,8 @@ public class AppResponse<T>{
         this.message = message;
         this.data = data;
     }
+
+    public static <T> AppResponse<T>  from(T data){
+        return new AppResponse<>(0, "Successful", data);
+    }
 }

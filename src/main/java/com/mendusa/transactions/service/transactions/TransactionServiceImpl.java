@@ -3,16 +3,19 @@ package com.mendusa.transactions.service.transactions;
 import com.mendusa.transactions.dto.*;
 import com.mendusa.transactions.repository.TransactionRepository;
 import com.mendusa.transactions.service.email.EmailService;
+import com.mendusa.transactions.utils.ComputationUtils;
 import com.mendusa.transactions.utils.Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.Tuple;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -85,23 +88,27 @@ public class TransactionServiceImpl implements TransactionService {
            totalTransactionList.add(Utils.getMethodSuccessRate(transactionMethodList(), paymentMethod));
         }
 
-        return Utils.calculateSuccessAndFailedPercentage(totalTransactionList);
+//        return ComputationUtils.calculateSuccessAndFailedPercentage(totalTransactionList);
 
+        return Collections.emptyList(); //TODO: fix and complete
     }
 
-    private List<PaymentRateResponse> getProviderSuccessRate(){
-        List<String> paymentProviders = List.of("INTERSWITCHSL", "INTERSWITCH", "MEDUSA_FCMB", "MEDUSA_FCMB_ONUS",
-                "NIBSSMEDUSA", "MAGTIPON","FCMB", "NIBSS", "BUILD MFB", "PARALLEX", "OPTIMUS BANK",
-                "NAVYMFB", "Build", "INTERSWITCH_SUPER", "MEDUSA_ACCESS", "Providus Bank", "TAJBank", "LOTUS BANK");
+    private List<PaymentRateResponse> getProviderSuccessRate() {
 
+        List<PaymentRateCount> providerTransactions = transactionProviderList();
 
-        List<List<PaymentRateCount>> totalTransactionList = new ArrayList<>();
+        Map<String, PaymentRateCount> rateCountMap  = new HashMap<>();
+        for (PaymentRateCount transaction : providerTransactions) {
+            final PaymentRateCount rate = rateCountMap.getOrDefault(transaction.getPayMethod(), new PaymentRateCount(
+                    transaction.getPayMethod(), 0, 0));
 
-        for (String paymentProvider: paymentProviders) {
-            totalTransactionList.add(Utils.getProviderSuccess(transactionProviderList(), paymentProvider));
+            if ("00".equals(transaction.getRc())) rate.setSuccess(rate.getSuccess() + transaction.getSuccess());
+
+            rateCountMap.put(transaction.getPayMethod(), rate);
         }
 
-        return Utils.calculateSuccessAndFailedPercentage(totalTransactionList);
+
+        return ComputationUtils.calculateSuccessAndFailedPercentage(rateCountMap.values());
     }
 
     private List<Tuple> transactionMethodList() {
@@ -110,23 +117,15 @@ public class TransactionServiceImpl implements TransactionService {
         Date last24Hours = cal.getTime();
         return transactionRepository.findTransactionCountByResponseCodeAndPaymentMethod(last24Hours);
 
-
-//        return transactionRepository.findAll().stream()
-//                .map(TransactionDto::new).collect(Collectors.toList());
-
-//        return transactionRepository.findAll();
-
-//return null;
-
     }
 
 
-    private List<Tuple> transactionProviderList() {
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.HOUR_OF_DAY, -24);
-        Date last24Hours = cal.getTime();
+    private List<PaymentRateCount> transactionProviderList() {
 
-        return transactionRepository.findTransactionCountByResponseCodeAndProvider(last24Hours);
+        return transactionRepository
+                .findTransactionCountByResponseCodeAndProvider(DateUtils.addDays(new Date(), -1))
+                .stream().map(PaymentRateCount::from)
+                .collect(Collectors.toList());
     }
 
 }
