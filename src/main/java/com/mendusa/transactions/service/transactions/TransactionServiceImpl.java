@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
-
     private final TransactionRepository transactionRepository;
 
     private final EmailService emailService;
@@ -50,7 +49,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public AppResponse<List<PaymentRateResponse>> methodSuccessRate() {
 
-        return new AppResponse<>(0, "Successful", getMethodSuccessRate() );
+        return new AppResponse<>(0, "Successful", getMethodSuccessRate());
     }
 
     @Override
@@ -61,12 +60,12 @@ public class TransactionServiceImpl implements TransactionService {
 
     private List<RecentTransactionResponse> getListOfTransactions() {
         return transactionRepository.findAll(
-                PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+                        PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
                 .map(RecentTransactionResponse::new)
                 .getContent();
     }
 
-    private void sendTransactionFile( final FileAttachment attachment) {
+    private void sendTransactionFile(final FileAttachment attachment) {
         EmailDto emailDto = EmailDto.builder()
                 .recipient("nwajeigoddowell@gmail.com")
                 .subject("RECEIPT")
@@ -74,57 +73,45 @@ public class TransactionServiceImpl implements TransactionService {
                 .attachment(Collections.singletonList(attachment))
                 .build();
 
-                emailService.sendAsync(emailDto);
+        emailService.sendAsync(emailDto);
 
 
     }
 
-    private List<PaymentRateResponse> getMethodSuccessRate(){
-        List<String> paymentsMethods = List.of("CARD","TRANSFER", "PAYWITHTRANSFER");
+    private List<PaymentRateResponse> getMethodSuccessRate() {
+        List<MethodDto> methodTransactions = transactionMethodList();
 
-        List<List<PaymentRateCount>> totalTransactionList = new ArrayList<>();
 
-        for (String paymentMethod: paymentsMethods) {
-           totalTransactionList.add(Utils.getMethodSuccessRate(transactionMethodList(), paymentMethod));
-        }
+        Map<String, PaymentRateCount> rateCountMap = Utils.getMethodSuccessRate(methodTransactions);
 
-//        return ComputationUtils.calculateSuccessAndFailedPercentage(totalTransactionList);
 
-        return Collections.emptyList(); //TODO: fix and complete
+        return ComputationUtils.calculateSuccessAndFailedPercentage(rateCountMap.values());
+
     }
 
     private List<PaymentRateResponse> getProviderSuccessRate() {
 
-        List<PaymentRateCount> providerTransactions = transactionProviderList();
+        List<ProviderDto> providerTransactions = transactionProviderList();
 
-        Map<String, PaymentRateCount> rateCountMap  = new HashMap<>();
-        for (PaymentRateCount transaction : providerTransactions) {
-            final PaymentRateCount rate = rateCountMap.getOrDefault(transaction.getPayMethod(), new PaymentRateCount(
-                    transaction.getPayMethod(), 0, 0));
-
-            if ("00".equals(transaction.getRc())) rate.setSuccess(rate.getSuccess() + transaction.getSuccess());
-
-            rateCountMap.put(transaction.getPayMethod(), rate);
-        }
-
+        Map<String, PaymentRateCount> rateCountMap = Utils.getProviderSuccessRate(providerTransactions);
 
         return ComputationUtils.calculateSuccessAndFailedPercentage(rateCountMap.values());
     }
 
-    private List<Tuple> transactionMethodList() {
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.HOUR_OF_DAY, -24);
-        Date last24Hours = cal.getTime();
-        return transactionRepository.findTransactionCountByResponseCodeAndPaymentMethod(last24Hours);
+    private List<MethodDto> transactionMethodList() {
 
+        return transactionRepository
+                .findTransactionCountByResponseCodeAndPaymentMethod(DateUtils.addDays(new Date(), -1))
+                .stream().map(MethodDto::from)
+                .collect(Collectors.toList());
     }
 
 
-    private List<PaymentRateCount> transactionProviderList() {
+    private List<ProviderDto> transactionProviderList() {
 
         return transactionRepository
                 .findTransactionCountByResponseCodeAndProvider(DateUtils.addDays(new Date(), -1))
-                .stream().map(PaymentRateCount::from)
+                .stream().map(ProviderDto::from)
                 .collect(Collectors.toList());
     }
 
