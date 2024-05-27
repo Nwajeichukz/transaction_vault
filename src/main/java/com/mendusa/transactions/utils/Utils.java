@@ -1,6 +1,8 @@
 package com.mendusa.transactions.utils;
 
+import com.mendusa.transactions.dto.MethodDto;
 import com.mendusa.transactions.dto.PaymentRateCount;
+import com.mendusa.transactions.dto.ProviderDto;
 import com.opencsv.CSVWriter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
@@ -17,7 +19,9 @@ import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -131,59 +135,38 @@ public class Utils {
         return result;
     }
 
+    public static Map<String, PaymentRateCount> getMethodSuccessRate(List<MethodDto> methodTransactions) {
+        Map<String, PaymentRateCount> rateCountMap = new HashMap<>();
 
-    public static List<PaymentRateCount> getMethodSuccessRate(List<Tuple> objectList, String paymentMethod) {
-        List<PaymentRateCount> rateCountList = new ArrayList<>();
+        for (MethodDto transaction : methodTransactions) {
+            final PaymentRateCount rate = rateCountMap.getOrDefault(transaction.getMethod(), new PaymentRateCount(
+                    transaction.getMethod(), 0, 0));
 
+            if ("00".equals(transaction.getResponseCode())) rate.setSuccess(transaction.getCount());
 
-        int total = 0;
-        int success = 0;
+            rate.setTotal(rate.getTotal() + transaction.getCount());
 
-        for (Tuple transaction : objectList) {
-            String response = transaction.get("responseCode", String.class);
-            String getPaymentMethod = transaction.get("paymentMethod", String.class);
-            Long totalSuccess = transaction.get("totalCount", Long.class);
-
-            if (getPaymentMethod.equalsIgnoreCase(paymentMethod)) {
-                total += totalSuccess;
-                if ("00".equals(response)) success += totalSuccess;
-            }
+            rateCountMap.put(transaction.getMethod(), rate);
         }
 
-        PaymentRateCount paymentRateCount = new PaymentRateCount(paymentMethod, total, success);
-        rateCountList.add(paymentRateCount);
-
-        log.info("--> total total {}", total);
-        log.info("--> total success {}", success);
-        return rateCountList;
+        return rateCountMap;
     }
 
 
-    public static List<PaymentRateCount> getProviderSuccess(List<Tuple> objectList, String provider) {
-        List<PaymentRateCount> rateCountList = new ArrayList<>();
+    public static Map<String, PaymentRateCount> getProviderSuccessRate(List<ProviderDto> providerTransactions) {
+        Map<String, PaymentRateCount> rateCountMap = new HashMap<>();
 
-        int total = 0;
-        int success = 0;
+        for (ProviderDto transaction : providerTransactions) {
+            final PaymentRateCount rate = rateCountMap.getOrDefault(transaction.getProvider(), new PaymentRateCount(
+                    transaction.getProvider(), 0, 0));
 
-        for (Tuple transaction : objectList) {
-            String response = transaction.get("responseCode", String.class);
-            String getProvider = transaction.get("provider", String.class);
-            Long totalSuccess = transaction.get("totalCount", Long.class);
+            if ("00".equals(transaction.getResponseCode())) rate.setSuccess(transaction.getCount());
 
-            if (getProvider == null) getProvider = "providerNull";
+            rate.setTotal(rate.getTotal() + transaction.getCount());
 
-            if (getProvider.equalsIgnoreCase(provider)) {
-                total += totalSuccess;
-                if ("00".equals(response)) success += totalSuccess;
-            }
-
-
+            rateCountMap.put(transaction.getProvider(), rate);
         }
-        PaymentRateCount paymentRateCount = new PaymentRateCount(provider, total, success);
-        rateCountList.add(paymentRateCount);
 
-        return rateCountList;
+        return rateCountMap;
     }
-
-
 }
